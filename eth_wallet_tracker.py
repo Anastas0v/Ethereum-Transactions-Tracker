@@ -21,7 +21,7 @@ def get_account_balance(address):
     value = int(data["result"]) / ETHER_VALUE
     return value
 
-def get_transactions(address):
+def get_balance_tracker(address):
     transactions_url = make_api_url("account", "txlist", address, startblock=0, endblock=99999999, page=1, offset=10000, sort="asc")
     response = get(transactions_url)
     data = response.json()["result"]
@@ -58,12 +58,31 @@ def get_transactions(address):
         balances.append(current_balance)
         times.append(time)
 
-    print(current_balance)
     plt.plot(times,balances)
     plt.show()
 
-eth = get_account_balance(address)
-print(eth)
+def get_transactions(address):
+    transactions_url = make_api_url("account", "txlist", address, startblock=0, endblock=99999999, page=1, offset=10000, sort="asc")
+    response = get(transactions_url)
+    data = response.json()["result"]
 
-trans = get_transactions(address)
-print(trans)
+    for tx in data:
+        to = tx["to"]
+        from_address = tx["from"]
+        value = int(tx["value"]) / ETHER_VALUE
+        gas = int(tx["gasUsed"]) * int(tx["gasPrice"]) / ETHER_VALUE
+        time= datetime.fromtimestamp(int(tx['timeStamp']))
+
+        print("-----------------------")
+        print("To: ", to)
+        print("From: ", from_address)
+        print("Value: ", value)
+        print("Gas: ", gas)
+        print("Time: ", time)
+
+eth = get_account_balance(address)
+print("Account Balance IS: ", eth)
+
+get_transactions(address)
+
+trans = get_balance_tracker(address)
